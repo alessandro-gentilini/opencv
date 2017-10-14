@@ -1210,10 +1210,11 @@ icvHoughCirclesGradient( CvMat* img, float dp, float min_dist,
         // Check if the circle has enough support
         if( max_count > acc_threshold )
         {
-            float c[3];
+            float c[4];
             c[0] = cx;
             c[1] = cy;
             c[2] = (float)r_best;
+            c[3] = (float)max_count;
             cvSeqPush( circles, c );
             if( circles->total > circles_max )
                 return;
@@ -1257,19 +1258,19 @@ cvHoughCircles( CvArr* src_image, void* circle_storage,
 
     if( CV_IS_STORAGE( circle_storage ))
     {
-        circles = cvCreateSeq( CV_32FC3, sizeof(CvSeq),
-            sizeof(float)*3, (CvMemStorage*)circle_storage );
+        circles = cvCreateSeq( CV_32FC4, sizeof(CvSeq),
+            sizeof(float)*4, (CvMemStorage*)circle_storage );
     }
     else if( CV_IS_MAT( circle_storage ))
     {
         mat = (CvMat*)circle_storage;
 
         if( !CV_IS_MAT_CONT( mat->type ) || (mat->rows != 1 && mat->cols != 1) ||
-            CV_MAT_TYPE(mat->type) != CV_32FC3 )
+            CV_MAT_TYPE(mat->type) != CV_32FC4 )
             CV_Error( CV_StsBadArg,
             "The destination matrix should be continuous and have a single row or a single column" );
 
-        circles = cvMakeSeqHeaderForArray( CV_32FC3, sizeof(CvSeq), sizeof(float)*3,
+        circles = cvMakeSeqHeaderForArray( CV_32FC4, sizeof(CvSeq), sizeof(float)*4,
                 mat->data.ptr, mat->rows + mat->cols - 1, &circles_header, &circles_block );
         circles_max = circles->total;
         cvClearSeq( circles );
@@ -1335,5 +1336,7 @@ void cv::HoughCircles( InputArray _image, OutputArray _circles,
                     dp, min_dist, param1, param2, minRadius, maxRadius );
     seqToMat(seq, _circles);
 }
+
+// http://answers.opencv.org/question/53484/questions-regarding-the-how-to-contribute-a-tutorialcode-or-a-bugfix-to-opencv-source-code-guide/
 
 /* End of file. */
